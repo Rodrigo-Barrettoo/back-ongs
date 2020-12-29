@@ -1,29 +1,40 @@
-import { getRepository } from 'typeorm';
+import { injectable, inject } from 'tsyringe';
+import DependencyInjectionName from '@constants/names';
 import { hash } from 'bcryptjs';
-import User from '../../../models/User';
+import AppError from '@shared/errors/AppError';
+import User from '../entities/User';
 import IUserDTO from '../dtos/ICreateUserDTO';
+import IUserRepository from '../http/typeorm/repositories/UserRepository';
 
+@injectable()
 class CreateUserService {
+  constructor(
+    @inject(DependencyInjectionName.user)
+    private usersRepository: IUserRepository,
+  ) {}
+
   public async execute({
     name,
     email,
-    type,
     password,
+    type,
   }: IUserDTO): Promise<User> {
-    const userRepository = getRepository(User);
+    const checkUserExists = await this.usersRepository.findByEmail(email);
 
-    const passwordHashed = await hash(password, 8);
+    if (checkUserExists) {
+      throw new AppError('E-mail already registered in the application');
+    }
 
-    const user = userRepository.create({
+    const hashPassword = await hash(password, 8);
+
+    const newUser = await this.usersRepository.create({
       name,
       email,
+      password: hashPassword,
       type,
-      password: passwordHashed,
     });
 
-    await userRepository.save(user);
-
-    return user;
+    return newUser;
   }
 }
 
