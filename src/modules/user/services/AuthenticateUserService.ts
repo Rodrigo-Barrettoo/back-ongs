@@ -32,7 +32,7 @@ class AuthenticateUserService {
     const checkMatchPassword = await compare(password, user.password);
 
     if (!checkMatchPassword) {
-      throw new AppError('Incorrect email/password combinations2');
+      throw new AppError('Incorrect email/password combinations');
     }
 
     const { expiresIn, secret } = jwtConfig;
