@@ -35,6 +35,23 @@ class UserRepository implements IUserRepository {
 
     return user;
   }
+
+  public async findById(id: string): Promise<User | undefined> {
+    const user = await this.ormRepository.findOne(id);
+
+    return user;
+  }
+
+  public async findAllUsers(): Promise<User[]> {
+    const users = await this.ormRepository.find();
+    return users;
+  }
+
+  public async updateUser(user: User): Promise<User> {
+    const userUpdated = await this.ormRepository.save(user);
+
+    return userUpdated;
+  }
 }
 
 export default UserRepository;
